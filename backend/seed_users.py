@@ -1,5 +1,6 @@
-from database import SessionLocal
-import models
+from backend.database import Base, engine
+from backend import models
+
 from datetime import datetime
 from routers.auth import safe_hash   # adjust import if auth.py is in routers/
 

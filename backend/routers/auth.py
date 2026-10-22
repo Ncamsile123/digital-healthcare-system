@@ -4,8 +4,9 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
-import models
 from database import SessionLocal
+import models
+
 from pydantic import BaseModel
 
 # ✅ Request model for login

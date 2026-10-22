@@ -1,9 +1,7 @@
-from sqlalchemy import Column, Integer, String, Text, TIMESTAMP, DateTime, Date, ForeignKey, DECIMAL
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, Date, Text, DECIMAL
 from sqlalchemy.orm import relationship
-from database import Base
 from datetime import datetime
-
-
+from database import Base, engine
 
 
 class Patient(Base):
@@ -55,4 +53,21 @@ class Billing(Base):
     invoice_date = Column(Date, default=datetime.utcnow)   # ✅ match DB
     status = Column(String(50), default="Pending")
 
+class SMSReminder(Base):
+    __tablename__ = "sms_reminders"
 
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("patients.patient_id"))
+    appointment_id = Column(Integer, ForeignKey("appointments.appointment_id"))
+    phone_number = Column(String(20), nullable=False)
+    message = Column(String(255), nullable=False)
+    scheduled_time = Column(DateTime, nullable=False)
+    sent = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class AppointmentReminderOffset(Base):
+    __tablename__ = "appointment_reminder_offsets"
+
+    id = Column(Integer, primary_key=True, index=True)
+    appointment_id = Column(Integer, ForeignKey("appointments.appointment_id"))
+    offset_hours = Column(Integer, nullable=False)

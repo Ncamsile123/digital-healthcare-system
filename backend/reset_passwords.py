@@ -1,6 +1,7 @@
 from passlib.context import CryptContext
-from database import SessionLocal
-import models
+from backend.database import Base, engine
+from backend import models
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

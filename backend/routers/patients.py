@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from database import SessionLocal
 import models
 
+
 router = APIRouter(prefix="/patients", tags=["Patients"])
 
 # Dependency to get DB session

@@ -1,22 +1,34 @@
 from fastapi import FastAPI
-from database import Base, engine
 import models
-from routers import patients, appointments, billing, medical_records, auth   # ✅ add medical_records
+from database import engine
+from routers import patients, appointments, billing, medical_records, auth, reports, sicknotes
+import reminder_scheduler
+
 
 # Create FastAPI app instance
-app = FastAPI()
+app = FastAPI(title="Digital Healthcare System")
 
 # Create database tables
-Base.metadata.create_all(bind=engine)
+models.Base.metadata.create_all(bind=engine)
 
 # Register routers
 app.include_router(patients.router)
 app.include_router(appointments.router)
 app.include_router(billing.router)
-app.include_router(medical_records.router)  # ✅ register medical_records
-app.include_router(auth.router)  # ✅ register auth
+app.include_router(medical_records.router)
+app.include_router(auth.router)
+app.include_router(reports.router, prefix="/reports", tags=["Reports"])
+app.include_router(sicknotes.router)
+
+# Start reminder scheduler when app starts
+@app.on_event("startup")
+def startup_event():
+    reminder_scheduler.scheduler.start()
+
+@app.on_event("shutdown")
+def shutdown_event():
+    reminder_scheduler.scheduler.shutdown()
+
 @app.get("/")
 def home():
     return {"message": "Healthcare System API Running"}
-
-

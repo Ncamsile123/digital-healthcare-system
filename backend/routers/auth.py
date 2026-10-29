@@ -42,9 +42,12 @@ def safe_hash(password: str):
     return pwd_context.hash(password)
 
 def safe_verify(plain_password: str, hashed_password: str):
-    if len(plain_password) > 72:
-        plain_password = plain_password[:72]
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        plain_password = plain_password.encode("utf-8")[:72].decode("utf-8", errors="ignore")
+        return pwd_context.verify(plain_password, hashed_password)
+    except Exception as e:
+        print("VERIFY ERROR:", e)
+        return False
 
 # ✅ JWT helpers
 def create_access_token(data: dict, expires_delta: timedelta = None):
@@ -79,12 +82,41 @@ def require_role(allowed_roles: list):
 # ✅ Login endpoint
 @router.post("/login")
 def login(request: LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.username == request.username).first()
-    if not user:
-        raise HTTPException(status_code=401, detail="User not found")
+    try:
+        user = db.query(models.User).filter(
+            models.User.username == request.username
+        ).first()
 
-    if not safe_verify(request.password, user.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+        if not user:
+            raise HTTPException(
+                status_code=401,
+                detail="User not found"
+            )
 
-    access_token = create_access_token(data={"sub": user.username, "role": user.role})
-    return {"access_token": access_token, "token_type": "bearer"}
+        print("User found:", user.username)
+        print("Hash:", user.password_hash)
+
+        if not safe_verify(
+            request.password,
+            user.password_hash
+        ):
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid credentials"
+            )
+
+        access_token = create_access_token(
+            data={
+                "sub": user.username,
+                "role": user.role
+            }
+        )
+
+        return {
+            "access_token": access_token,
+            "token_type": "bearer"
+        }
+
+    except Exception as e:
+        print("LOGIN ERROR:", e)
+        raise

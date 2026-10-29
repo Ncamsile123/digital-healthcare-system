@@ -43,3 +43,7 @@ def get_patient(patient_id: int, db: Session = Depends(get_db)):
         "national_id": patient.national_id,
         "created_at": str(patient.created_at) if patient.created_at else None
     }
+@router.get("/count")
+def patient_count(db: Session = Depends(get_db)):
+    count = db.query(models.Patient).count()
+    return {"count": count}

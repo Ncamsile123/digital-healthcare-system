@@ -80,3 +80,6 @@ def list_appointments_for_patient(patient_id: int, db: Session = Depends(get_db)
         }
         for appt in appointments
     ]
+@router.get("/")
+def get_appointments(db: Session = Depends(get_db)):
+    return db.query(models.Appointment).all()

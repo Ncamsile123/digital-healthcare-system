@@ -15,6 +15,7 @@ class Patient(Base):
     gender = Column(String, nullable=True)
     national_id = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    face_image = Column(String, nullable=True)
 
 
 class User(Base):

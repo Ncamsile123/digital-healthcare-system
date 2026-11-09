@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, D
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from database import Base, engine
+from sqlalchemy import Text
 
 
 class Patient(Base):
@@ -42,8 +43,9 @@ class MedicalRecord(Base):
     patient_id = Column(Integer, ForeignKey("patients.patient_id"))
     diagnosis = Column(String, nullable=False)
     treatment = Column(String, nullable=False)
-    notes = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    notes = Column(Text, nullable=True)
+    visit_date = Column(DateTime, default=datetime.utcnow)
+
 
 class Billing(Base):
     __tablename__ = "billing"

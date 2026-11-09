@@ -1,8 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    UploadFile,
+    File,
+    Form
+)
+
 from sqlalchemy.orm import Session
 from database import SessionLocal
 import models
-
+import os
+import shutil
 
 router = APIRouter(prefix="/patients", tags=["Patients"])
 
@@ -16,16 +25,47 @@ def get_db():
 
 # ✅ Create Patient
 @router.post("/")
-def create_patient(first_name: str, last_name: str, phone_number: str, db: Session = Depends(get_db)):
+async def create_patient(
+    first_name: str = Form(...),
+    last_name: str = Form(...),
+    phone_number: str = Form(...),
+    date_of_birth: str = Form(None),
+    gender: str = Form(None),
+    national_id: str = Form(None),
+    image: UploadFile = File(None),
+    db: Session = Depends(get_db)
+):
     new_patient = models.Patient(
         first_name=first_name,
         last_name=last_name,
-        phone_number=phone_number
+        phone_number=phone_number,
+        date_of_birth=date_of_birth,
+        gender=gender,
+        national_id=national_id
     )
+
     db.add(new_patient)
     db.commit()
     db.refresh(new_patient)
-    return {"message": "Patient created successfully", "patient_id": new_patient.patient_id}
+
+    if image:
+        os.makedirs("media/faces", exist_ok=True)
+
+        file_path = (
+            f"media/faces/patient_{new_patient.patient_id}.jpg"
+        )
+
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
+
+        new_patient.face_image = file_path
+
+        db.commit()
+
+    return {
+        "message": "Patient created successfully",
+        "patient_id": new_patient.patient_id
+    }
 
 # ✅ Retrieve Patient by ID
 @router.get("/{patient_id}")

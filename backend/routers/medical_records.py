@@ -34,7 +34,7 @@ def create_medical_record(
         diagnosis=diagnosis,
         treatment=treatment,
         notes=notes,
-        created_at=datetime.utcnow()
+        visit_date=datetime.utcnow()
     )
     db.add(new_record)
     db.commit()
@@ -59,7 +59,7 @@ def list_medical_records(patient_id: int, db: Session = Depends(get_db)):
             "diagnosis": rec.diagnosis,
             "treatment": rec.treatment,
             "notes": rec.notes,
-            "created_at": str(rec.created_at)
+            "visit_date": str(rec.visit_date)
         }
         for rec in records
     ]
